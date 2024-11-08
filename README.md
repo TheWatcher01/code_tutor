@@ -1,18 +1,18 @@
-## **"Code Tutor" Project Plan: Course Access Platform (audio and text) with GPT Interaction and Contextual Memory**
+# **"Code Tutor" Project Plan: Course Access Platform (audio and text) with GPT Interaction and Contextual Memory**
 
 ---
 
-### **1. Initial Analysis and Objective Definition**
+## **1. Initial Analysis and Objective Definition**
 
 - **Main Objective:** Develop an interactive web platform called **"Code Tutor"** that allows users to access courses in text and audio format, with secure identification, personalized progress tracking, and automated interaction with a customized GPT via Puppeteer.
 - **Platform:** VPS server based on Ubuntu.
 - **Technologies:**
-    - **Frontend:** React.js
-    - **Backend:** Node.js, SWC, PNPM with Express.js
-    - **Database:** MongoDB for storing users, courses, interactions, and code snippets
-    - **Automation:** Puppeteer to interact with GPT
-    - **Authentication:** JWT for user management and GitHub authentication to capture user GitHub keys and retrieve their data for future functions.
-    - **LLM for AI:** Language models will be run locally via **LMStudio AI** with LLMs available on **HuggingFace**.
+  - **Frontend:** React.js
+  - **Backend:** Node.js, SWC, PNPM with Express.js
+  - **Database:** MongoDB for storing users, courses, interactions, and code snippets
+  - **Automation:** Puppeteer to interact with GPT
+  - **Authentication:** JWT for user management and GitHub authentication to capture user GitHub keys and retrieve their data for future functions.
+  - **LLM for AI:** Language models will be run locally via **LMStudio AI** with LLMs available on **HuggingFace**.
 
 **Important Note:** No cloud IT services are used. All development is done on an Ubuntu LTS VPS. If necessary, an additional server equipped with an Intel i5 processor, 32GB DDR4 RAM, an RTX 3060 GPU, and language models run via **LMStudio AI** is available for implementing future AI features.
 
@@ -21,9 +21,9 @@
 ### **2. Environment Setup**
 
 - **Tools:**
-    - Install **Node.js**, **pnpm**, **MongoDB**, and **Puppeteer** for the **backend**.
-    - Use **Create React App** to initialize the **React** project for the **frontend**.
-    - Configure **Git** for version control with a repository on **GitHub** or **GitLab**.
+  - Install **Node.js**, **pnpm**, **MongoDB**, and **Puppeteer** for the **backend**.
+  - Use **Create React App** to initialize the **React** project for the **frontend**.
+  - Configure **Git** for version control with a repository on **GitHub** or **GitLab**.
 - **Environment Variables:** Create a `.env` file in the root directory to store secret keys and sensitive configurations for both the backend and frontend.
 
 ---
@@ -31,116 +31,116 @@
 ### **3. Architecture Design**
 
 - **Frontend (React):**
-    - Create components for the **login** page, **courses** page, and **GPT interaction**.
-    - Use **React Router** for navigation between pages (login, courses, interactions).
-    - **State Management:** Use hooks (`useState`, `useEffect`) and **Redux** or Context API.
+  - Create components for the **login** page, **courses** page, and **GPT interaction**.
+  - Use **React Router** for navigation between pages (login, courses, interactions).
+  - **State Management:** Use hooks (`useState`, `useEffect`) and **Redux** or Context API.
 - **Backend (Node.js with Express.js):**
-    - Create a **RESTful API** to handle CRUD operations (users, courses, interactions).
-    - **Authentication:** Use JWT and password hashing with **bcryptjs**, along with GitHub authentication for user sign-in.
-    - **Puppeteer:** Scripts for automating interactions with GPT, managing user sessions, and **communication via HTTP requests** to transmit interactions to GPT.
+  - Create a **RESTful API** to handle CRUD operations (users, courses, interactions).
+  - **Authentication:** Use JWT and password hashing with **bcryptjs**, along with GitHub authentication for user sign-in.
+  - **Puppeteer:** Scripts for automating interactions with GPT, managing user sessions, and **communication via HTTP requests** to transmit interactions to GPT.
 - **Database (MongoDB):**
-    - Model schemas for users, courses, interactions, and code snippets.
-    - Implement indexing to improve performance.
+  - Model schemas for users, courses, interactions, and code snippets.
+  - Implement indexing to improve performance.
 
 ---
 
 ### **4. Backend Development**
 
 - **Authentication and Security:**
-    - Registration and login routes, password hashing with **bcrypt**, and GitHub OAuth implementation.
-    - Protect routes with a JWT middleware.
+  - Registration and login routes, password hashing with **bcrypt**, and GitHub OAuth implementation.
+  - Protect routes with a JWT middleware.
 - **Course Management:**
-    - Endpoints to create, read, update, and delete text and audio courses.
-    - Manage audio file upload and streaming.
+  - Endpoints to create, read, update, and delete text and audio courses.
+  - Manage audio file upload and streaming.
 - **Puppeteer and GPT:**
-    - Integrate Puppeteer to open a browser instance and interact with GPT.
-    - Manage conversational context, save interactions in MongoDB.
-    - **Real-time Progress Tracking:** Track user progress to detect the end of sections or courses and generate appropriate responses from GPT.
-    - **Context Transmission:** Current content (text or audio) will be transmitted to GPT to provide accurate responses, examples, explanations, or exercises.
-    - **GPT Proactivity:** GPT can ask proactive questions at the end of a session or suggest resources in case of inactivity.
+  - Integrate Puppeteer to open a browser instance and interact with GPT.
+  - Manage conversational context, save interactions in MongoDB.
+  - **Real-time Progress Tracking:** Track user progress to detect the end of sections or courses and generate appropriate responses from GPT.
+  - **Context Transmission:** Current content (text or audio) will be transmitted to GPT to provide accurate responses, examples, explanations, or exercises.
+  - **GPT Proactivity:** GPT can ask proactive questions at the end of a session or suggest resources in case of inactivity.
 
 ---
 
 ### **5. Frontend Development (React)**
 
 - **Project Structure:**
-    - Initialize with **Create React App** and organize into folders (`components`, `services`, `pages`).
+  - Initialize with **Create React App** and organize into folders (`components`, `services`, `pages`).
 - **Key Components:**
-    - **Login/Registration Page:** Form with field validation and error handling, including options for GitHub login.
-    - **Courses Page:** List of courses with details, audio playback, and progress tracking.
-    - **GPT Interaction:** Input field and display of GPT responses.
+  - **Login/Registration Page:** Form with field validation and error handling, including options for GitHub login.
+  - **Courses Page:** List of courses with details, audio playback, and progress tracking.
+  - **GPT Interaction:** Input field and display of GPT responses.
 - **Styles and Responsiveness:**
-    - Use libraries like **Material-UI** or **Bootstrap**.
-    - Ensure a smooth user experience on mobile and desktop.
+  - Use libraries like **Material-UI** or **Bootstrap**.
+  - Ensure a smooth user experience on mobile and desktop.
 
 ---
 
 ### **6. Storage and Interaction Management**
 
 - **Contextual Memory:**
-    - Save questions asked and responses provided by GPT in MongoDB.
-    - Manage sessions for each user, personalized tracking.
-    - **Processing with LlamaIndex:** Use LlamaIndex to structure and index interactions for future queries and improve response relevance.
+  - Save questions asked and responses provided by GPT in MongoDB.
+  - Manage sessions for each user, personalized tracking.
+  - **Processing with LlamaIndex:** Use LlamaIndex to structure and index interactions for future queries and improve response relevance.
 - **Code Storage:**
-    - Save code snippets submitted by users in MongoDB for exercises and educational interactions.
-    - **Code Learning Progress Tracking:** GPT evaluates understanding of concepts via code snippets and provides personalized feedback.
+  - Save code snippets submitted by users in MongoDB for exercises and educational interactions.
+  - **Code Learning Progress Tracking:** GPT evaluates understanding of concepts via code snippets and provides personalized feedback.
 
 ---
 
 ### **7. Testing and Validation**
 
 - **Unit and Integration Tests:**
-    - Backend tests with **Jest** or **Mocha**, React component tests with **React Testing Library**.
-    - Test scenarios to verify major functionalities: login, courses, GPT interactions.
+  - Backend tests with **Jest** or **Mocha**, React component tests with **React Testing Library**.
+  - Test scenarios to verify major functionalities: login, courses, GPT interactions.
 - **Functional and Beta Testing:**
-    - Implement automated tests and a group of testers for user feedback.
+  - Implement automated tests and a group of testers for user feedback.
 
 ---
 
 ### **8. Documentation and Deployment**
 
 - **Technical Documentation:**
-    - Use **Swagger** to document the API and a user guide for the application.
+  - Use **Swagger** to document the API and a user guide for the application.
 - **Deployment:**
-    - Set up the production environment, deploy on the Ubuntu VPS.
+  - Set up the production environment, deploy on the Ubuntu VPS.
 
 ---
 
 ### **9. Security and Best Practices**
 
 - **Data Security:**
-    - Encrypt passwords with **bcrypt**, use HTTPS to secure communications.
-    - Protect against XSS, CSRF, and SQL injection attacks.
+  - Encrypt passwords with **bcrypt**, use HTTPS to secure communications.
+  - Protect against XSS, CSRF, and SQL injection attacks.
 - **Backups:**
-    - Schedule regular database backups and manage potential failures.
+  - Schedule regular database backups and manage potential failures.
 
 ---
 
 ### **10. Future Extensions**
 
 - **Contextual Memory Improvement:**
-    - Integrate **LlamaIndex** to enhance conversational context management.
+  - Integrate **LlamaIndex** to enhance conversational context management.
 - **OpenAI API Integration:**
-    - Prepare the backend for future migration to the OpenAI API.
+  - Prepare the backend for future migration to the OpenAI API.
 - **New Features:**
-    - Integrate **LlamaIndex** and **LangChain** for new features like **RAG** (Retrieval-Augmented Generation), **COT** (Chain of Thought), **TOT** (Tree of Thought), **OPRO** (Optimized Prompt Response Output), **MOE** (Mixture of Experts), etc.
-    - Custom **Google search engine** to allow users to explore additional information.
-    - **Knowledge Graph** system inspired by Wikipedia, allowing users to explore or deepen concepts and notions, as well as the links between them.
-    - Future integration of the **Wikipedia API** to enrich search results.
-    - **Chrome Extension:** Create an extension to allow users to use the GPT educational assistant on other educational sites, with contextualized interactions.
-    - **External Content Tracking:** The extension will track the content of visited web pages to offer tailored responses.
+  - Integrate **LlamaIndex** and **LangChain** for new features like **RAG** (Retrieval-Augmented Generation), **COT** (Chain of Thought), **TOT** (Tree of Thought), **OPRO** (Optimized Prompt Response Output), **MOE** (Mixture of Experts), etc.
+  - Custom **Google search engine** to allow users to explore additional information.
+  - **Knowledge Graph** system inspired by Wikipedia, allowing users to explore or deepen concepts and notions, as well as the links between them.
+  - Future integration of the **Wikipedia API** to enrich search results.
+  - **Chrome Extension:** Create an extension to allow users to use the GPT educational assistant on other educational sites, with contextualized interactions.
+  - **External Content Tracking:** The extension will track the content of visited web pages to offer tailored responses.
 
 ---
 
 ### **11. Methodology and Project Management**
 
 - **Agile Methodology:**
-    - Use sprints for development organization with regular checkpoints.
+  - Use sprints for development organization with regular checkpoints.
 - **Tracking Tools:**
-    - **Trello** or **Jira** for task management and project progress tracking.
+  - **Trello** or **Jira** for task management and project progress tracking.
 - **Risks and Scalability:**
-    - Plan strategies to manage Puppeteer limits and server load.
-    - Anticipate scaling to support more users.
+  - Plan strategies to manage Puppeteer limits and server load.
+  - Anticipate scaling to support more users.
 
 ---
 
@@ -149,6 +149,7 @@
 ### **Basic Tools Installation:**
 
 #### System Update
+
 Before any installation, it is important to update the operating system to ensure all packages are up to date:
 
 ```bash
@@ -156,6 +157,7 @@ sudo apt update && sudo apt upgrade -y
 ```
 
 ### Node.js Installation
+
 Node.js is essential for running our backend server based on **Express**. Install Node.js with the following command:
 
 ```bash
@@ -163,6 +165,7 @@ sudo apt install -y nodejs
 ```
 
 ### pnpm Installation (Efficient Package Manager)
+
 pnpm is used to manage dependencies more efficiently than npm. Install it with:
 
 ```bash
@@ -170,6 +173,7 @@ npm install -g pnpm
 ```
 
 ### MongoDB Installation
+
 MongoDB is the database used to store users, courses, and interactions. Install MongoDB with the following commands:
 
 ```bash
@@ -180,6 +184,7 @@ sudo apt install -y mongodb-org
 ```
 
 ### MongoDB Shell Installation (mongosh)
+
 To interact with the database, install **mongosh**:
 
 ```bash
@@ -187,6 +192,7 @@ sudo apt install -y mongodb-mongosh
 ```
 
 ### Puppeteer Installation (Globally)
+
 Puppeteer is used to automate interactions with GPT. Install it globally to use it throughout the project:
 
 ```bash
@@ -194,6 +200,7 @@ pnpm add -g puppeteer
 ```
 
 ### Create React App Installation
+
 Create React App is used to initialize our **React** project for the **frontend**:
 
 ```bash
@@ -201,6 +208,7 @@ pnpm create react-app frontend
 ```
 
 ### SWC Installation
+
 SWC is a fast transpiler used to replace Babel. Install it in your **frontend** project with:
 
 ```bash
@@ -223,6 +231,7 @@ pnpm add -D nodemon
 ## **Version Control:**
 
 ### Git Installation
+
 Git is used for version control. Install it with the following command:
 
 ```bash
@@ -230,6 +239,7 @@ sudo apt install -y git
 ```
 
 ### Git Repository Initialization
+
 Once Git is installed, initialize a Git repository in your project and connect it to your remote repository on GitHub or GitLab:
 
 ```bash
@@ -242,6 +252,7 @@ git remote add origin <URL_of_your_github_or_gitlab_repository>
 ## **MongoDB and JWT Setup:**
 
 ### Start MongoDB
+
 Start the MongoDB service and ensure it starts on boot:
 
 ```bash
@@ -250,6 +261,7 @@ sudo systemctl enable mongod
 ```
 
 ### Create Database and User
+
 Use **mongosh** to create a database and a user with read and write privileges:
 
 ```bash
@@ -272,9 +284,11 @@ pnpm add express mongoose jsonwebtoken bcrypt dotenv cors
 ## **Environment Variables:**
 
 ### Create `.env` File
+
 The `.env` file is used to store sensitive information like MongoDB connection and JWT secret.
 
 #### Generate a JWT Secret Key
+
 Use the following command to generate a JWT secret key and store it in your `.env` file:
 
 ```bash
@@ -282,6 +296,7 @@ JWT_SECRET=$(openssl rand -base64 32)
 ```
 
 #### Add Variables to `.env` File
+
 Create a `.env` file at the root of the project and add the following variables:
 
 ```bash
@@ -291,6 +306,7 @@ echo "JWT_EXPIRATION=3600" >> .env  # Token validity duration in seconds
 ```
 
 ### **Backend Project Structure**
+
 Here is the initial backend structure once everything is set up:
 
 ```bash
@@ -317,6 +333,7 @@ Here is the initial backend structure once everything is set up:
 ```
 
 ### **Frontend Project Structure**
+
 Here is the initial frontend structure once everything is set up:
 
 ```bash
@@ -344,6 +361,7 @@ Here is the initial frontend structure once everything is set up:
 ## **Initialization of the Frontend Project with React**
 
 ### Creating the React Project
+
 The frontend of the **Code Tutor** application is developed with **React**, a JavaScript library for building dynamic user interfaces. We used **Create React App** to initialize the project, which creates a base project structure and configures essential dependencies.
 
 To initialize the React project, execute the following command:
@@ -353,6 +371,7 @@ pnpm create react-app frontend
 ```
 
 ### Initial Project Structure
+
 The initialization with **Create React App** generates a base project structure as follows:
 
 ```bash
@@ -375,6 +394,7 @@ frontend/
 ### Installing Frontend Dependencies
 
 #### Installing React Router
+
 For managing routes and navigation between different pages of the application, **React Router** is used. Install it with the following command:
 
 ```bash
@@ -382,6 +402,7 @@ pnpm add react-router-dom
 ```
 
 #### Installing SWC for Transpilation
+
 SWC is used as a fast alternative to Babel for transpiling TypeScript code. To integrate it into our project, install it with the following command:
 
 ```bash
@@ -391,6 +412,7 @@ pnpm add -D @swc/core
 ## **Page and Route Management with React Router**
 
 ### App.tsx
+
 The **App.tsx** file is the main component that manages the application's routes using **React Router**. It defines the paths for each page of the application: home, login, and registration.
 
 ```typescript
@@ -416,6 +438,7 @@ export default App;
 ```
 
 ### Home.tsx
+
 The **Home.tsx** file represents the application's home page. This static component presents a welcome message to the user.
 
 ```typescript
@@ -907,4 +930,3 @@ module.exports = logger;
 ```
 
 ---
-

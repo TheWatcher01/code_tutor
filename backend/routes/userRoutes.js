@@ -1,35 +1,85 @@
 /**
  * @file userRoutes.js
+ * @description User routes with enhanced security and logging
  * @author TheWatcher01
- * @date 09-10-2024
- * @description This file contains the routes for user registration, login, and profile retrieval.
+ * @date 2024-11-08
  */
 
-const express = require('express'); // Import the express module to create an application framework.
-const router = express.Router(); // Create a new router object.
-const { registerUser, loginUser, getProfile } = require('../controllers/userController'); // Import user controller functions.
-const verifyToken = require('../middlewares/authTokenMiddleware'); // Import middleware for verifying JWT.
+import express from "express";
+import { verifyToken } from "../auth/authMiddleware.js";
+import {
+  registerUser,
+  loginUser,
+  getProfile,
+} from "../controllers/userController.js";
+import backendLogger from "../config/backendLogger.js";
 
-/**
- * @route POST /register
- * @description Route for user registration.
- * This route allows new users to register by providing their username, email, and password.
- */
-router.post('/register', registerUser); // Handle user registration requests.
+const router = express.Router();
 
-/**
- * @route POST /login
- * @description Route for user login.
- * This route allows users to log in by providing their email and password.
- */
-router.post('/login', loginUser); // Handle user login requests.
+// Log middleware for user routes
+const logUserRequest = (req, res, next) => {
+  backendLogger.debug("User route accessed:", {
+    path: req.path,
+    method: req.method,
+    ip: req.ip,
+    timestamp: new Date().toISOString(),
+  });
+  next();
+};
 
-/**
- * @route GET /profile
- * @description Protected route for user profile retrieval.
- * This route retrieves the profile of the currently authenticated user.
- * It requires a valid JWT for access.
- */
-router.get('/profile', verifyToken, getProfile); // Handle requests to get the user's profile.
+// Apply logging to all user routes
+router.use(logUserRequest);
 
-module.exports = router; // Export the user routes for use in other parts of the application.
+// Register a new user
+router.post(
+  "/register",
+  (req, res, next) => {
+    backendLogger.info("User registration initiated", {
+      email: req.body.email,
+      username: req.body.username,
+    });
+    next();
+  },
+  registerUser
+);
+
+// Authenticate user and return tokens
+router.post(
+  "/login",
+  (req, res, next) => {
+    backendLogger.info("User login attempted", {
+      email: req.body.email,
+    });
+    next();
+  },
+  loginUser
+);
+
+// Get authenticated user's profile
+router.get(
+  "/profile",
+  verifyToken,
+  (req, res, next) => {
+    backendLogger.info("Profile retrieval", {
+      userId: req.user?.id,
+    });
+    next();
+  },
+  getProfile
+);
+
+// Error handling middleware for user routes
+router.use((err, req, res, next) => {
+  backendLogger.error("User route error:", {
+    error: err.message,
+    path: req.path,
+    method: req.method,
+  });
+
+  res.status(err.status || 500).json({
+    success: false,
+    error: err.message || "Internal server error",
+  });
+});
+
+export default router;

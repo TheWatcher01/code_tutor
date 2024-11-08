@@ -1,0 +1,38 @@
+{
+  "name": "code_tutor_root",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun run start:prod",
+    "start:prod": "cross-env NODE_ENV=production concurrently \"bun run start:backend\" \"bun run start:frontend\"",
+    "dev": "cross-env NODE_ENV=development concurrently \"bun run dev:backend\" \"bun run dev:frontend\"",
+    "dev:backend": "cd backend && bun run dev",
+    "dev:frontend": "cd frontend1 && bun run dev",
+    "start:backend": "cd backend && bun run start",
+    "start:frontend": "cd frontend1 && bun run start",
+    "build": "concurrently \"cd backend && bun run build\" \"cd frontend1 && bun run build\"",
+    "clean": "concurrently \"cd backend && bun run clean\" \"cd frontend1 && bun run clean\"",
+    "test": "concurrently \"cd backend && bun run test\" \"cd frontend1 && bun run test\""
+  },
+  "workspaces": [
+    "frontend1",
+    "backend"
+  ],
+  "engines": {
+    "bun": ">=1.0.0",
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "cross-env": "latest",
+    "source-map-explorer": "latest",
+    "concurrently": "latest"
+  },
+  "dependencies": {
+    "@octokit/rest": "^21.0.2",
+    "@types/react-router-dom": "^5.3.3",
+    "axios": "^1.7.7",
+    "passport-github2": "^0.1.12",
+    "react-router-dom": "^6.28.0"
+  }
+}

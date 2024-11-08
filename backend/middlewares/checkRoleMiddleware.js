@@ -1,38 +1,162 @@
 /**
  * @file checkRoleMiddleware.js
+ * @description Enhanced role-based access control middleware
  * @author TheWatcher01
- * @date 09-10-2024
- * @description This file contains middleware for verifying user roles based on JWT.
+ * @date 2024-11-08
  */
 
-const jwt = require('jsonwebtoken'); // Import jsonwebtoken for verifying tokens.
-const logger = require('../config/logger'); // Import logger for logging information and errors.
+import jwt from "jsonwebtoken";
+import backendLogger from "../config/backendLogger.js";
+import config from "../config/dotenvConfig.js";
 
-/**
- * @function verifyRole
- * @description Middleware function that verifies the user's role based on the JWT provided in the request header.
- * If the role is valid, it adds the user information to the request object and proceeds to the next middleware.
- * If the role is invalid or the token is missing, it responds with an error message.
- * @param {Array<string>} roles - The list of valid roles for accessing the route.
- * @returns {Function} A middleware function that verifies the user's role.
- */
-const verifyRole = (roles) => {
-  return (req, res, next) => {
-    const token = req.header('Authorization'); // Get the token from the Authorization header.
-    if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' }); // Respond with access denied error if no token is provided.
+// Role hierarchy definition
+const ROLE_HIERARCHY = {
+  admin: ["admin", "mentor", "student"],
+  mentor: ["mentor", "student"],
+  student: ["student"],
+};
 
+// Validate if a role has access to required roles
+const hasRequiredRole = (userRole, requiredRoles) => {
+  if (!userRole || !ROLE_HIERARCHY[userRole]) return false;
+  return requiredRoles.some((role) => ROLE_HIERARCHY[userRole].includes(role));
+};
+
+// Create middleware for role-based access control
+export const verifyRole = (roles) => {
+  // Convert single role to array
+  const requiredRoles = Array.isArray(roles) ? roles : [roles];
+
+  return async (req, res, next) => {
     try {
-      const verified = jwt.verify(token, process.env.JWT_SECRET); // Verify the token using the JWT secret.
-      if (!roles.includes(verified.role)) { // Check if the user's role is valid.
-        return res.status(403).json({ error: 'Access denied. Invalid role.' }); // Respond with access denied error if the role is invalid.
+      const authHeader = req.headers.authorization;
+
+      if (!authHeader?.startsWith("Bearer ")) {
+        backendLogger.warn("Role verification failed: No bearer token", {
+          path: req.path,
+          ip: req.ip,
+        });
+
+        return res.status(401).json({
+          success: false,
+          error: "Authentication required",
+        });
       }
-      req.user = verified; // Add the verified user information to the request object.
-      next(); // Call the next middleware function.
-    } catch (err) {
-      logger.error('Access denied: Invalid token', err); // Log any errors encountered during token verification.
-      return res.status(401).json({ error: 'Access denied. Invalid token.' }); // Respond with an invalid token error.
+
+      const token = authHeader.split(" ")[1];
+
+      // Verify token
+      const decoded = jwt.verify(token, config.JWT_SECRET, {
+        algorithms: ["HS256"],
+        issuer: config.JWT_ISSUER,
+        audience: config.JWT_AUDIENCE,
+      });
+
+      // Check if token contains role information
+      if (!decoded.role) {
+        backendLogger.warn("Role verification failed: No role in token", {
+          userId: decoded.id,
+        });
+
+        return res.status(403).json({
+          success: false,
+          error: "Invalid token: no role specified",
+        });
+      }
+
+      // Verify role access
+      if (!hasRequiredRole(decoded.role, requiredRoles)) {
+        backendLogger.warn(
+          "Role verification failed: Insufficient privileges",
+          {
+            userId: decoded.id,
+            userRole: decoded.role,
+            requiredRoles,
+          }
+        );
+
+        return res.status(403).json({
+          success: false,
+          error: "Insufficient privileges",
+        });
+      }
+
+      // Add user info to request
+      req.user = {
+        id: decoded.id,
+        username: decoded.username,
+        role: decoded.role,
+        permissions: ROLE_HIERARCHY[decoded.role],
+      };
+
+      backendLogger.debug("Role verification successful", {
+        userId: decoded.id,
+        role: decoded.role,
+        path: req.path,
+      });
+
+      next();
+    } catch (error) {
+      backendLogger.error("Role verification error:", {
+        error: error.message,
+        stack: config.NODE_ENV === "development" ? error.stack : undefined,
+      });
+
+      if (error.name === "TokenExpiredError") {
+        return res.status(401).json({
+          success: false,
+          error: "Token expired",
+        });
+      }
+
+      if (error.name === "JsonWebTokenError") {
+        return res.status(401).json({
+          success: false,
+          error: "Invalid token",
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        error: "Role verification failed",
+      });
     }
   };
 };
 
-module.exports = verifyRole; // Export the verifyRole middleware for use in other parts of the application.
+// Middleware for checking specific permissions
+export const checkPermissions = (permissions) => {
+  return (req, res, next) => {
+    if (!req.user?.permissions) {
+      return res.status(401).json({
+        success: false,
+        error: "Authentication required",
+      });
+    }
+
+    const hasPermission = permissions.every((permission) =>
+      req.user.permissions.includes(permission)
+    );
+
+    if (!hasPermission) {
+      backendLogger.warn("Permission check failed", {
+        userId: req.user.id,
+        required: permissions,
+        actual: req.user.permissions,
+      });
+
+      return res.status(403).json({
+        success: false,
+        error: "Insufficient permissions",
+      });
+    }
+
+    next();
+  };
+};
+
+export default {
+  verifyRole,
+  checkPermissions,
+  ROLE_HIERARCHY,
+};

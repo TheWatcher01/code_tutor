@@ -1,0 +1,54 @@
+# Main workspace configuration
+[workspaces]
+backend = "./backend"
+frontend1 = "./frontend1"
+
+# Install configuration
+[install]
+production = false
+frozen-lockfile = true
+cache = true
+
+# Development configuration for frontend
+[dev.frontend1]
+port = 5173
+entry = "./frontend1/src/index.tsx"
+target = "browser"
+framework = "react"
+publicDir = "./frontend1/public"
+outdir = "./frontend1/dist"
+serve = true
+host = "0.0.0.0"
+open = true
+preload = ["react", "react-dom"]
+
+# Development configuration for backend
+[dev.backend]
+port = 5001
+entry = "./backend/server.js"
+target = "node"
+watch = true
+hot = true
+
+# Dev server proxy configuration
+[dev.frontend1.proxy]
+"/api" = "http://localhost:5001"
+
+# Environment configuration
+[env]
+NODE_ENV = "development"
+
+# TypeScript configuration
+[typescript]
+jsx = "react-jsx"
+
+# React specific configuration
+[react]
+fast-refresh = true
+development = true
+jsx-runtime = "automatic"
+jsx-import-source = "react"
+
+# Aliases
+[alias]
+"@/*" = "src/*"

@@ -32,6 +32,8 @@ yarn-error.log*
 # Logs
 *.log
 **/*.log
+logs/
+**/logs/
 
 # Ignore compiled output
 dist/
@@ -50,3 +52,11 @@ out/
 # Ignore the uploads folder if it contains files that don't need to be tracked
 uploads/
 **/uploads/
+
+# gitignore
+.gitignore
+**/.gitignore
+
+# cursor
+.cursorignore
+**/.cursorignore
