@@ -1,7 +1,7 @@
 # Main workspace configuration
 [workspaces]
 backend = "./backend"
-frontend1 = "./frontend1"
+frontend = "./frontend"
 
 # Install configuration
 [install]
@@ -10,13 +10,13 @@ frozen-lockfile = true
 cache = true
 
 # Development configuration for frontend
-[dev.frontend1]
+[dev.frontend]
 port = 5173
-entry = "./frontend1/src/index.tsx"
+entry = "./frontend/src/index.tsx"
 target = "browser"
 framework = "react"
-publicDir = "./frontend1/public"
-outdir = "./frontend1/dist"
+publicDir = "./frontend/public"
+outdir = "./frontend/dist"
 serve = true
 host = "0.0.0.0"
 open = true
@@ -31,7 +31,7 @@ watch = true
 hot = true
 
 # Dev server proxy configuration
-[dev.frontend1.proxy]
+[dev.frontend.proxy]
 "/api" = "http://localhost:5001"
 
 # Environment configuration

@@ -36,6 +36,11 @@ export default defineConfig({
       "@pages": path.resolve(__dirname, "./src/pages"),
       "@styles": path.resolve(__dirname, "./src/styles"),
       "@types": path.resolve(__dirname, "./src/types"),
+      "@constants": path.resolve(__dirname, "./src/constants"),
+      "@contexts": path.resolve(__dirname, "./src/contexts"),
+      "@hooks": path.resolve(__dirname, "./src/hooks"),
+      "@utils": path.resolve(__dirname, "./src/utils"),
+      "@config": path.resolve(__dirname, "./src/config")
     }
   },
   optimizeDeps: {

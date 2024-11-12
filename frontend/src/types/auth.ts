@@ -1,9 +1,4 @@
-/**
- * @file auth.ts
- * @author TheWatcher01
- * @date 08-11-2024
- * @description Type definitions for authentication system
- */
+// File path: frontend/src/types/auth.ts
 
 export interface User {
     id: string;

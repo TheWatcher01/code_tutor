@@ -8,15 +8,15 @@
     "start:prod": "cross-env NODE_ENV=production concurrently \"bun run start:backend\" \"bun run start:frontend\"",
     "dev": "cross-env NODE_ENV=development concurrently \"bun run dev:backend\" \"bun run dev:frontend\"",
     "dev:backend": "cd backend && bun run dev",
-    "dev:frontend": "cd frontend1 && bun run dev",
+    "dev:frontend": "cd frontend && bun run dev",
     "start:backend": "cd backend && bun run start",
-    "start:frontend": "cd frontend1 && bun run start",
-    "build": "concurrently \"cd backend && bun run build\" \"cd frontend1 && bun run build\"",
-    "clean": "concurrently \"cd backend && bun run clean\" \"cd frontend1 && bun run clean\"",
-    "test": "concurrently \"cd backend && bun run test\" \"cd frontend1 && bun run test\""
+    "start:frontend": "cd frontend && bun run start",
+    "build": "concurrently \"cd backend && bun run build\" \"cd frontend && bun run build\"",
+    "clean": "concurrently \"cd backend && bun run clean\" \"cd frontend && bun run clean\"",
+    "test": "concurrently \"cd backend && bun run test\" \"cd frontend && bun run test\""
   },
   "workspaces": [
-    "frontend1",
+    "frontend",
     "backend"
   ],
   "engines": {
@@ -32,6 +32,7 @@
     "@octokit/rest": "^21.0.2",
     "@types/react-router-dom": "^5.3.3",
     "axios": "^1.7.7",
+    "grant": "^5.4.23",
     "passport-github2": "^0.1.12",
     "react-router-dom": "^6.28.0"
   }

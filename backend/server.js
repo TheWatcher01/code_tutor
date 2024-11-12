@@ -15,10 +15,10 @@ import compression from "compression";
 import rateLimit from "express-rate-limit";
 import morgan from "morgan";
 import mongoose from "mongoose";
-import config from "./config/dotenvConfig.js";
-import connectDB, { dbUtils } from "./config/dbConnexion.js";
+import config from "./config/dotenvConfig.js"; // Import environment configuration
+import connectDB, { dbUtils } from "./config/dbConnexion.js"; // Import database connection and utilities
 import backendLogger from "./config/backendLogger.js";
-import passport from "./auth/githubService.js";
+import passport from "./auth/githubAuthService.js";
 import sessionMiddleware from "./middlewares/sessionMiddleware.js";
 import authRoutes from "./auth/routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -220,7 +220,7 @@ const initializeServer = async () => {
     initializeRoutes();
 
     // Static files and SPA setup
-    const frontendPublicPath = path.join(__dirname, "..", config.FRONTEND_PATH || "frontend1", "public");
+    const frontendPublicPath = path.join(__dirname, "..", config.FRONTEND_PATH || "frontend", "public");
     if (!fs.existsSync(frontendPublicPath)) {
       fs.mkdirSync(frontendPublicPath, { recursive: true });
       backendLogger.info(`Created frontend public directory: ${frontendPublicPath}`);

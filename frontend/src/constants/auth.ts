@@ -1,7 +1,4 @@
-/**
- * @file constants/auth.ts
- * @description Authentication constants and event names
- */
+// File path: frontend/src/constants/auth.ts
 
 export const AUTH_EVENTS = {
     LOGIN_SUCCESS: 'auth:login:success',

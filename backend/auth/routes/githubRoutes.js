@@ -1,220 +1,100 @@
 /**
  * @file githubRoutes.js
- * @description Routes for GitHub OAuth authentication
+ * @description GitHub OAuth routes with simplified flow
  * @author TheWatcher01
- * @date 2024-11-08
+ * @date 2024-11-12
  */
 
 import express from "express";
-import passport from "../githubService.js";
+import passport from "../githubAuthService.js";
+import { githubAuthService, AUTH_CONSTANTS } from "../githubAuthService.js";
 import backendLogger from "../../config/backendLogger.js";
 import config from "../../config/dotenvConfig.js";
-import { generateTokens, validateToken } from "../jwtService.js";
-import crypto from "crypto";
-import { githubUtils } from "../githubService.js";
+import { generateTokens } from "../jwtService.js";
 
 const router = express.Router();
-const { GITHUB_SCOPES } = githubUtils;
 
-// Security constants
-const AUTH_TIMEOUT = 300000; // 5 minutes in milliseconds
-const STATE_BYTES = 32;
-
-// Ajout des constantes de performance
-const PERFORMANCE_METRICS = {
-  AUTH_SLOW_THRESHOLD: 2000, // 2 secondes
-  CALLBACK_SLOW_THRESHOLD: 3000, // 3 secondes
+const ROUTES = {
+  SUCCESS: "/playground",
+  FAILURE: "/login",
 };
 
-// Generate secure random state for OAuth flow
-const generateSecureState = () =>
-  crypto.randomBytes(STATE_BYTES).toString("hex");
-
-// Log auth requests
-const logGithubAuth = (req, res, next) => {
-  const startTime = Date.now();
-  const requestId = crypto.randomBytes(8).toString('hex');
-
-  backendLogger.debug("GitHub auth request:", {
-    requestId,
-    path: req.path,
-    state: req.query.state,
-    origin: req.headers.origin,
-    userAgent: req.headers["user-agent"]?.substring(0, 100),
-    ip: req.ip,
-    sessionId: req.sessionID,
-    timestamp: new Date().toISOString(),
-    headers: {
-      referer: req.headers.referer,
-      'accept-language': req.headers['accept-language']
-    }
+/**
+ * Builds frontend redirect URL with tokens
+ */
+const buildRedirectUrl = (path, params = {}) => {
+  const url = new URL(path, config.FRONTEND_URL);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) url.searchParams.append(key, value.toString());
   });
-
-  // Logging à la fin de la requête
-  res.on('finish', () => {
-    const duration = Date.now() - startTime;
-    
-    if (duration > PERFORMANCE_METRICS.AUTH_SLOW_THRESHOLD) {
-      backendLogger.warn("Slow auth request detected:", {
-        requestId,
-        duration,
-        path: req.path,
-        sessionId: req.sessionID
-      });
-    }
-
-    backendLogger.debug("Auth request completed:", {
-      requestId,
-      duration,
-      statusCode: res.statusCode,
-      sessionId: req.sessionID
-    });
-  });
-
-  next();
+  return url.toString();
 };
 
-// Start GitHub authentication flow
-router.get("/", logGithubAuth, (req, res, next) => {
+/**
+ * Initialize GitHub authentication
+ */
+router.get("/", (req, res, next) => {
   try {
-    const state = generateSecureState();
-    req.session.githubState = state;
-    req.session.authStartTime = Date.now();
+    req.session.returnTo = ROUTES.SUCCESS;
 
-    backendLogger.info("Starting GitHub authentication flow", {
-      sessionId: req.sessionID,
-      state,
-      scopes: GITHUB_SCOPES,
-      timestamp: new Date().toISOString()
-    });
+    backendLogger.info("Starting GitHub authentication");
 
     passport.authenticate("github", {
-      scope: GITHUB_SCOPES,
-      state,
+      scope: AUTH_CONSTANTS.SCOPES,
       session: true,
-      allowSignup: config.GITHUB_ALLOW_SIGNUP === 'true'
     })(req, res, next);
   } catch (error) {
-    backendLogger.error("Auth initialization failed:", {
-      error: error.message,
-      stack: error.stack,
-      scopes: GITHUB_SCOPES,
-      timestamp: new Date().toISOString()
-    });
-    res.redirect(`${config.FRONTEND_URL}/login?error=github_init_failed`);
+    backendLogger.error("Auth initialization failed:", error);
+    res.redirect(buildRedirectUrl(ROUTES.FAILURE));
   }
 });
 
-// Handle GitHub OAuth callback
+/**
+ * Handle GitHub OAuth callback
+ */
 router.get(
   "/callback",
-  logGithubAuth,
-  (req, res, next) => {
-    const callbackStartTime = Date.now();
-    try {
-      const { state } = req.query;
-      const storedState = req.session.githubState;
-      const authStartTime = req.session.authStartTime;
-
-      // Métriques détaillées du processus d'auth
-      const authMetrics = {
-        totalDuration: Date.now() - authStartTime,
-        steps: {
-          stateValidation: Date.now() - callbackStartTime,
-          oauthFlow: Date.now() - authStartTime,
-          sessionSetup: Date.now() - authStartTime
-        },
-        memory: process.memoryUsage(),
-        performance: {
-          timeToFirstByte: res.getHeader('X-Response-Time'),
-          redirectTime: Date.now() - authStartTime
-        }
-      };
-
-      backendLogger.debug("Auth flow metrics:", authMetrics);
-
-      backendLogger.debug("GitHub callback validation:", {
-        queryState: state,
-        storedState,
-        authStartTime,
-        sessionId: req.sessionID
-      });
-
-      if (!state || !storedState || state !== storedState) {
-        throw new Error("Invalid state parameter");
-      }
-
-      const authDuration = Date.now() - authStartTime;
-      if (authDuration > AUTH_TIMEOUT) {
-        throw new Error("Authentication timeout");
-      }
-
-      next();
-    } catch (error) {
-      backendLogger.error("Callback validation failed:", {
-        error: error.message,
-        stack: error.stack,
-        duration: Date.now() - callbackStartTime,
-        sessionId: req.sessionID
-      });
-      res.redirect(`${config.FRONTEND_URL}/login?error=validation_failed`);
-    }
-  },
   passport.authenticate("github", {
-    failureRedirect: `${config.FRONTEND_URL}/login?error=github_auth_failed`,
-    session: true
+    failureRedirect: buildRedirectUrl(ROUTES.FAILURE),
+    session: true,
   }),
   async (req, res) => {
     try {
       const { user } = req;
-      
-      backendLogger.info("GitHub authentication successful:", {
-        userId: user?.id,
-        username: user?.username,
-        sessionId: req.sessionID
+      if (!user) {
+        throw new Error("No user data received");
+      }
+
+      // Generate tokens
+      const tokens = await generateTokens(user);
+
+      backendLogger.info("Authentication successful", {
+        userId: user.id,
+        username: user.username,
       });
 
-      const redirectUrl = new URL("/playground", config.FRONTEND_URL);
-      redirectUrl.searchParams.append("auth", "success");
+      // Set tokens in cookies for added security
+      res.cookie("accessToken", tokens.accessToken, {
+        httpOnly: true,
+        secure: config.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+      });
 
-      res.redirect(redirectUrl.toString());
+      // Redirect with token in URL (for frontend)
+      const redirectUrl = buildRedirectUrl(
+        req.session.returnTo || ROUTES.SUCCESS,
+        {
+          access_token: tokens.accessToken,
+        }
+      );
+
+      res.redirect(redirectUrl);
     } catch (error) {
       backendLogger.error("Callback processing failed:", error);
-      res.redirect(`${config.FRONTEND_URL}/login?error=callback_failed`);
+      res.redirect(buildRedirectUrl(ROUTES.FAILURE));
     }
   }
 );
-
-// Check auth status
-router.get("/status", async (req, res) => {
-  try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-
-    if (!token) {
-      return res.json({
-        success: true,
-        data: { isAuthenticated: false },
-      });
-    }
-
-    const decoded = await validateToken(token);
-
-    res.json({
-      success: true,
-      data: {
-        isAuthenticated: true,
-        provider: "github",
-        userId: decoded.id,
-        username: decoded.username,
-      },
-    });
-  } catch (error) {
-    backendLogger.error("Status check failed:", error);
-    res.status(401).json({
-      success: false,
-      error: "Invalid or expired authentication",
-    });
-  }
-});
 
 export default router;
